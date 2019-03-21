@@ -20,7 +20,7 @@ module.exports = {
     application_type:"/api/application_type/",
     applications:"/api/application/",
     licences:"/api/licences/",
-    call_email:"/api/call_email",
+    call_email:"/api/call_email/",
     returns:"/api/returns/",
     application_standard_conditions:"/api/application_standard_conditions/",
     application_conditions:"/api/application_conditions/",
