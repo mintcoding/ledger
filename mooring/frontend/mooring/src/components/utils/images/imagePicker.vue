@@ -1,7 +1,7 @@
 <template >
     <div class="row" imagePicker>
             <div class="form-group">
-                <div class="col-sm-12" v-if="invent">
+                <div class="col-sm-12">
                     <span class="btn btn-primary btn-file">
                         <i class="fa fa-fw fa-camera"></i><input multiple ref="imagePicker" type="file" name='img' @change="readURL()" />
                     Add Image
@@ -43,8 +43,7 @@
 <script>
 import {
     $,
-    slick,
-    api_endpoints
+    slick
 }
 from '../../../hooks'
 import {
@@ -67,7 +66,6 @@ module.exports = {
     data: function() {
         let vm = this;
         return {
-            invent: false,
             slide: 0,
             addingImage: false,
             imageLoaderText:'',
@@ -183,19 +181,6 @@ module.exports = {
         });
         vm.slide = vm.images.length;
 
-        $.ajax({
-            url: api_endpoints.profile,
-            method: 'GET',
-            dataType: 'json',
-            success: function(data, stat, xhr){
-                if(data.is_inventory){
-                    vm.invent = true;
-                }
-            }
-        });
-        
-        // $('#collapse_images').click();
-        // vm.slick_refresh();
     },
     updated:function () {
         let vm =this;

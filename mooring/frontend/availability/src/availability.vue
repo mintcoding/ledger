@@ -421,7 +421,6 @@ export default {
                 return this.departureEl[0].value ? moment(this.departureData.getDate()).format('YYYY/MM/DD') : null; 
             }
         },
-
     },
     methods: {
         toggleMoreInfo: function(){

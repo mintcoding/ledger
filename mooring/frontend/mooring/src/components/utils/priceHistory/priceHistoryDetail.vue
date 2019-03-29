@@ -1,25 +1,10 @@
 <template id="PriceHistoryDetail">
-<bootstrapModal title="Add Booking Period" :large=true @ok="addHistory()" @close="close()">
+<bootstrapModal :title="title" :large=true @ok="addHistory()" @close="close()">
 
     <div class="modal-body">
         <form name="priceForm" class="form-horizontal">
 			<alert :show.sync="showError" type="danger">{{errorString}}</alert>
-
             <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Booking Period:</label>
-                    </div>
-                    <div class="col-md-4">
-                        <select name="period" v-model="priceHistory.booking_period_id" class="form-control">
-                            <option v-for="per in booking_periods" :value="per.id"> {{ per.name }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="row" style="display:none;">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label><i class="fa fa-question-circle"data-toggle="tooltip" data-placement="bottom" title="Select a rate to prefill the price fields otherwise use the manual entry"></i>Select Rate: </label>
@@ -32,7 +17,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row" style="display:none;">
+            <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Mooring Price: </label>
@@ -90,7 +75,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class='input-group date'>
-                            <input  id='period_start' name="period_start"  v-model="priceHistory.period_start" type='text' class="form-control" />
+                            <input  name="period_start"  v-model="priceHistory.period_start" type='text' class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
@@ -98,23 +83,6 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Period end: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <div class='input-group date'>
-                            <input  name="period_end"  v-model="priceHistory.period_end" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
             <reason type="price" v-model="priceHistory.reason" ></reason>
             <div v-show="requireDetails" class="row">
                 <div class="form-group">
@@ -126,17 +94,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                    </div>
-                    <div class="col-md-5" id='pricehistory_error' style='color: red; font-weight: bold;'>
-                    </div>
-                </div>
-            </div>
-
-
         </form>
     </div>
 
@@ -146,9 +103,8 @@
 <script>
 import bootstrapModal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
 import alert from '../alert.vue'
-import { mapGetters } from 'vuex'
 module.exports = {
     name: 'PriceHistoryDetail',
     props: {
@@ -161,7 +117,6 @@ module.exports = {
         let vm = this;
         return {
             id:'',
-            booking_period_id: '',
             selected_rate: '',
             title: '',
             rates: [],
@@ -172,14 +127,10 @@ module.exports = {
             errors: false,
             errorString: '',
             form: '',
-            reasons: [],
             isOpen: false,
         }
     },
     computed: {
-        ...mapGetters([
-          'booking_periods'
-        ]),
         showError: function() {
             var vm = this;
             return vm.errors;
@@ -191,15 +142,7 @@ module.exports = {
             return this.priceHistory.id ? this.priceHistory.id : '';
         },
         requireDetails: function() {
-            // let vm = this;
-            // var check = vm.priceHistory.reason;
-            // for (var i = 0; i < vm.reasons.length; i++){
-            //     if (vm.reasons[i].id == check){
-            //         return vm.reasons[i].detailRequired;
-            //     }
-            // }
-            let vm = this;
-            return (!vm.priceHistory.reason == '' || !vm.priceHistory.reason == null);
+            return this.priceHistory.reason == '1';
         },
     },
     watch: {
@@ -214,7 +157,6 @@ module.exports = {
                         vm.priceHistory.concession = rate.concession;
                         vm.priceHistory.child = rate.child;
                         vm.priceHistory.infant = rate.infant;
-                        $('#period_start').prop('disabled', true);
                     }
                 });
             }
@@ -225,7 +167,6 @@ module.exports = {
                 vm.priceHistory.concession = '0.00';
                 vm.priceHistory.child = '0.00';
                 vm.priceHistory.infant = '0.00';
-                $('#period_start').prop('disabled', false);
             }
         }
     },
@@ -241,7 +182,6 @@ module.exports = {
             this.selected_rate = '';
             this.priceHistory.period_start= '';
             this.priceHistory.details= '';
-            this.priceHistory.booking_period_id = '';
 
             this.errorString = '';
             this.isOpen = false;
@@ -265,23 +205,15 @@ module.exports = {
             let vm = this;
             $(vm.form).validate({
                 rules: {
-                    // adult: "required",
-                    // concession: "required",
-                    // child: "required",
-                    // infant:"required",
-                    booking_period_id:"required",
+                    adult: "required",
+                    concession: "required",
+                    child: "required",
+                    infant:"required",
                     period_start: "required",
-                    period_end: "required",
                     details: {
                         required: {
                             depends: function(el){
-                                // var check = vm.priceHistory.reason;
-                                // for (var i = 0; i < vm.reasons.length; i++){
-                                //     if (vm.reasons[i].id == check){
-                                //         return vm.reasons[i].detailRequired;
-                                //     }
-                                // }
-                                return (!vm.priceHistory.reason == '' || !vm.priceHistory.reason == null);
+                                return vm.priceHistory.reason=== '1';
                             }
                         }
                     }
@@ -291,10 +223,8 @@ module.exports = {
                     concession: "Enter a concession rate",
                     child: "Enter a child rate",
                     infant: "Enter a infant rate",
-                    booking_period_id: "Select a booking period",
                     period_start: "Enter a start date",
-                    period_end: "Enter a start end",
-                    details: "Details required if other reason is selected"
+                    details: "Details required if Other reason is selected"
                 },
                 showErrors: function(errorMap, errorList) {
 
@@ -322,39 +252,22 @@ module.exports = {
     },
     mounted: function() {
         var vm = this;
-        $('#pricehistory_error').html("");
-        vm.$store.dispatch("fetchBookingPeriods");
         $('[data-toggle="tooltip"]').tooltip()
         vm.form = document.forms.priceForm;
         var picker = $(vm.form.period_start).closest('.date');
-        var picker2 = $(vm.form.period_end).closest('.date');
         var today = new Date();
         today.setDate(today.getDate()+1);
         var tomorrow = new Date(today);
-
         picker.datetimepicker({
             format: 'DD/MM/YYYY',
             useCurrent: false,
             minDate: tomorrow
         });
-        picker2.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false,
-            minDate: tomorrow
-        });
-
         picker.on('dp.change', function(e){
             vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('DD/MM/YYYY');
         });
-        picker2.on('dp.change', function(e){
-            vm.priceHistory.period_end = picker2.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
-
         vm.addFormValidations();
         vm.fetchRates();
-        bus.$once('priceReasons',setReasons => {
-            vm.reasons = setReasons;
-        });
     }
 };
 </script>

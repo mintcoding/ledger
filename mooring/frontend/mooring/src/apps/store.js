@@ -19,8 +19,6 @@ var store = new Vuex.Store({
         mooring_groups: [],
         campgrounds:[],
         campsite_classes:[],
-        booking_period_options:[],
-        booking_periods:[],
         show_loader: false,
         app_loader_text: ''
     },
@@ -53,12 +51,6 @@ var store = new Vuex.Store({
         SETMOORINGGROUP(state, mooring_groups) {
             state.mooring_groups = mooring_groups;
         },
-        SETBOOKINGPERIODOPTIONS(state, val){
-            state.booking_period_options = val;
-        },
-        SETBOOKINGPERIODS(state, val){
-            state.booking_periods = val;
-        }
 
     },
     actions: {
@@ -99,16 +91,6 @@ var store = new Vuex.Store({
             $.get(api_endpoints.campsite_classes,function(data){
                 context.commit('SETCAMPSITECLASSES',data);
             });
-        },
-        fetchBookingPeriodOptions(context){
-            $.get(api_endpoints.booking_period_options,function(data){
-                context.commit('SETBOOKINGPERIODOPTIONS', data);
-            });
-        },
-        fetchBookingPeriods(context){
-            $.get(api_endpoints.booking_period, function(data){
-                context.commit('SETBOOKINGPERIODS', data);
-            });
         }
     },
     getters:{
@@ -135,12 +117,6 @@ var store = new Vuex.Store({
         },
         campsite_classes: state => {
             return state.campsite_classes;
-        },
-        booking_period_options: state => {
-            return state.booking_period_options;
-        },
-        booking_periods: state => {
-            return state.booking_periods;
         },
         app_loader_state: (state) => {
             return state.show_loader;

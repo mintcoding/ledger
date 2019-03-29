@@ -85,7 +85,6 @@ module.exports = {
             errors: false,
             errorString: '',
             form: '',
-            reasons: [],
             isOpen: false,
             create: true
         }
@@ -103,12 +102,7 @@ module.exports = {
         },
         requireDetails: function () {
             let vm = this;
-            var check = vm.stay.reason;
-            for (var i = 0; i < vm.reasons.length; i++){
-                if (vm.reasons[i].id == check){
-                    return vm.reasons[i].detailRequired;
-                }
-            }
+            return (vm.stay.reason == 1)? true: false;
         }
     },
     components: {
@@ -151,12 +145,7 @@ module.exports = {
                     stay_details: {
                         required: {
                             depends: function(el){
-                                var check = vm.stay.reason;
-                                for (var i = 0; i < vm.reasons.length; i++){
-                                    if (vm.reasons[i].id == check){
-                                        return vm.reasons[i].detailRequired;
-                                    }
-                                }
+                                return vm.stay.reason == 1;
                             }
                         }
                     }
@@ -211,9 +200,6 @@ module.exports = {
         });
         vm.form = $('#addMaxStayForm');
         vm.addFormValidations();
-        bus.$once('maxStayReasons',setReasons => {
-            vm.reasons = setReasons;
-        });
     }
 };
 </script>

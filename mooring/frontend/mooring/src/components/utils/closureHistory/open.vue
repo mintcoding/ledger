@@ -59,7 +59,6 @@ module.exports = {
             status: '',
             id:'',
             reason,
-            reasons: [],
             current_closure: '',
             formdata: {
                 range_start: '',
@@ -86,13 +85,7 @@ module.exports = {
             return this.$parent.isOpenOpenCS;
         },
         showDetails: function () {
-            let vm = this;
-            var check = this.formdata.reason;
-            for (var i = 0; i < vm.reasons.length; i++){
-                if (vm.reasons[i].id == check){
-                    return vm.reasons[i].detailRequired;
-                }
-            }
+            return this.formdata.reason == '1';
         }
     },
     components: {
@@ -142,12 +135,7 @@ module.exports = {
                     open_details: {
                         required: {
                             depends: function(el){
-                                var check = this.formdata.reason;
-                                for (var i = 0; i < vm.reasons.length; i++){
-                                    if (vm.reasons[i].id == check){
-                                        return vm.reasons[i].detailRequired;
-                                    }
-                                }
+                                return vm.formdata.reason === 'other';
                             }
                         }
                     }
@@ -197,9 +185,6 @@ module.exports = {
         });
         vm.form = $('#openCGForm');
         vm.addFormValidations();
-        bus.$once('openReasons',setReasons => {
-            vm.reasons = setReasons;
-        });
     }
 };
 </script>

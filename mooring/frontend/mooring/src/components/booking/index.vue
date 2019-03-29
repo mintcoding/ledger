@@ -1,13 +1,11 @@
 <template id="booking_index_vue">
     <div class="row">
-        <div class="col-lg-12">
-            <template v-if="showLoader">
-                <loader :isLoading="showLoader" >{{loaderText}}...</loader>
-            </template>
-            <template v-else class="booking-router">
-                <router-view></router-view>
-            </template>
-        </div>
+        <template v-if="showLoader">
+            <loader :isLoading="showLoader" >{{loaderText}}...</loader>
+        </template>
+        <template v-else class="booking-router">
+            <router-view></router-view>
+        </template>
     </div>
 </template>
 <script>

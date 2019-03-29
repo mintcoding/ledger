@@ -69,7 +69,7 @@
 <script>
 import bootstrapModal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
 import alert from '../alert.vue'
 module.exports = {
     name: 'ParkPriceHistoryDetail',
@@ -91,7 +91,6 @@ module.exports = {
             errors: false,
             errorString: '',
             form: '',
-            reasons: [],
             isOpen: false,
         }
     },
@@ -107,13 +106,7 @@ module.exports = {
             return this.priceHistory.id ? this.priceHistory.id : '';
         },
         requireDetails: function() {
-            let vm = this;
-            var check = vm.priceHistory.reason;
-            for (var i = 0; i < vm.reasons.length; i++){
-                if (vm.reasons[i].id == check){
-                    return vm.reasons[i].detailRequired;
-                }
-            }
+            return this.priceHistory.reason == '1';
         },
     },
     watch: {
@@ -155,13 +148,7 @@ module.exports = {
                     details: {
                         required: {
                             depends: function(el){
-                                let vm = this;
-                                var check = vm.priceHistory.reason;
-                                for (var i = 0; i < vm.reasons.length; i++){
-                                    if (vm.reasons[i].id == check){
-                                        return vm.reasons[i].detailRequired;
-                                    }
-                                }
+                                return vm.priceHistory.reason=== '1';
                             }
                         }
                     }
@@ -171,7 +158,7 @@ module.exports = {
                     concession: "Enter a concession rate",
                     motorbike: "Enter a motorbike rate",
                     period_start: "Enter a start date",
-                    details: "Details required if other reason is selected",
+                    details: "Details required if Other reason is selected"
                 },
                 showErrors: function(errorMap, errorList) {
 
@@ -214,9 +201,6 @@ module.exports = {
             vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('YYYY-MM-DD');
         });
         vm.addFormValidations();
-        bus.$once('priceReasons',setReasons => {
-            vm.reasons = setReasons;
-        });
     }
 };
 </script>
