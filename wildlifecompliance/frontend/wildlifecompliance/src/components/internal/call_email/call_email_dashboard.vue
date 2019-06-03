@@ -109,7 +109,7 @@
                             data: "number",
                         },
                         {
-                            data: "status",
+                            data: "status_display",
                         },
                         {
                             data: "classification",

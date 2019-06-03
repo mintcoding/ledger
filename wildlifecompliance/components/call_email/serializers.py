@@ -141,7 +141,6 @@ class LocationSerializer(GeoFeatureModelSerializer):
             'country',
             'wkb_geometry',
             'details',
-            #'call_email_id',
         )
         
 
@@ -163,16 +162,13 @@ class ReportTypeSerializer(serializers.ModelSerializer):
 
 class SaveCallEmailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display')
-    classification = ClassificationSerializer(read_only=True)
     location = LocationSerializer(read_only=True)
-    report_type = ReportTypeSerializer(read_only=True)
-    referrer = ReferrerSerializer(read_only=True)
     email_user = EmailUserSerializer(read_only=True)
+    location_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
+    email_user_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
     classification_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
     report_type_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
-    location_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
     referrer_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
-    email_user_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
 
     class Meta:
         model = CallEmail
@@ -183,15 +179,12 @@ class SaveCallEmailSerializer(serializers.ModelSerializer):
             'status_display',
             'schema',
             'location',
-            'classification',
-            'report_type',
-            'location_id',
             'classification_id',
             'report_type_id',
+            'referrer_id',
+            'location_id',
             'caller',
             'assigned_to',
-            'referrer_id',
-            'referrer',
             'caller_phone_number',
             'anonymous_call',
             'caller_wishes_to_remain_anonymous',
@@ -207,11 +200,7 @@ class SaveCallEmailSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             'id', 
-            'number', 
             'location',
-            'classification',
-            'report_type',
-            'referrer',
             'email_user',
             )
 
@@ -251,31 +240,30 @@ class CallEmailOptimisedSerializer(serializers.ModelSerializer):
 
 class CallEmailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display')
-    classification = ClassificationSerializer(read_only=True)
     lodgement_date = serializers.CharField(source='lodged_on')
-    report_type = ReportTypeSerializer(read_only=True)
     location = LocationSerializer(read_only=True)
-    referrer = ReferrerSerializer(read_only=True)
     data = ComplianceFormDataRecordSerializer(many=True)
     email_user = EmailUserSerializer()
+    classification_id = serializers.IntegerField( required=False, allow_null=True)
+    report_type_id = serializers.IntegerField( required=False, allow_null=True)
+    referrer_id = serializers.IntegerField( required=False, allow_null=True)
 
     class Meta:
         model = CallEmail
         fields = (
             'id',
             'status',
-             'status_display',
+            'status_display',
             'location',
             'location_id',
-            'classification',
             'classification_id',
+            'report_type_id',
+            'referrer_id',
             'schema',
             'lodgement_date',
             'number',
             'caller',
             'assigned_to',
-            'report_type',
-            'report_type_id',
             'data',
             'caller_phone_number',
             'anonymous_call',
@@ -285,11 +273,28 @@ class CallEmailSerializer(serializers.ModelSerializer):
             'occurrence_time_from',
             'occurrence_date_to',
             'occurrence_time_to',
-            'referrer',
-            'referrer_id',
             'advice_given',
             'advice_details',
             'email_user',
+        )
+        read_only_fields = ('id', )
+
+
+class CallEmailDashboardSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source='get_status_display')
+    classification = ClassificationSerializer(read_only=True)
+    lodgement_date = serializers.CharField(source='lodged_on')
+
+    class Meta:
+        model = CallEmail
+        fields = (
+            'id',
+            'status_display',
+            'classification',
+            'lodgement_date',
+            'number',
+            'caller',
+            'assigned_to',
         )
         read_only_fields = ('id', )
 
@@ -298,14 +303,11 @@ class CreateCallEmailSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display')
     lodgement_date = serializers.CharField(
         source='lodged_on')
-    classification_id = serializers.IntegerField(
-        required=False, write_only=True, allow_null=True)
-    report_type_id = serializers.IntegerField(
-        required=False, write_only=True, allow_null=True)        
     location_id = serializers.IntegerField(
-        required=False, write_only=True, allow_null=True)        
-    referrer_id = serializers.IntegerField(
-        required=False, write_only=True, allow_null=True)   
+        required=False, write_only=True, allow_null=True)       
+    classification_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
+    report_type_id = serializers.IntegerField( required=False, write_only=True, allow_null=True)
+    referrer_id = serializers.IntegerField( required=False, write_only=True, allow_null=True) 
 
     class Meta:
         model = CallEmail
@@ -313,12 +315,13 @@ class CreateCallEmailSerializer(serializers.ModelSerializer):
             'id',
             'status',
             'status_display',
-            'location_id',
             'classification_id',
+            'report_type_id',
+            'referrer_id',
+            'location_id',
             'lodgement_date',
             'caller',
             'assigned_to',
-            'report_type_id',
             'caller_phone_number',
             'anonymous_call',
             'caller_wishes_to_remain_anonymous',
@@ -329,7 +332,6 @@ class CreateCallEmailSerializer(serializers.ModelSerializer):
             'occurrence_time_to',
             'advice_given',
             'advice_details',
-            'referrer_id',
         )
         read_only_fields = ('id', )
 
