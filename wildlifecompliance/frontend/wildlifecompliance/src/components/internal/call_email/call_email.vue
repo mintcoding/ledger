@@ -41,6 +41,9 @@
                             </div>
                           </div>
                         </div>
+                        <a @click="updateAssignedToId('current_user')" class="btn">
+                            Assign to me
+                        </a>
                     </div>
                 </div>
             </div>
@@ -541,19 +544,24 @@ export default {
       if (returned_schema) {
         this.current_schema = returned_schema.schema;
       }
-        
       });
     },
-    updateAssignedToId: async function () {
+    updateAssignedToId: async function (user) {
         let url = helpers.add_endpoint_join(
-            api_endpoints.call_email, 
+            api_endpoints.call_email,
             this.call_email.id + '/update_assigned_to_id/'
             );
+        let payload = null;
+        if (user === 'current_user') {
+            payload = { 'current_user': true }
+        } else {
+            payload = { 'assigned_to_id': this.call_email.assigned_to_id }
+        }
         let res = await Vue.http.post(
-            url, 
-            { 'assigned_to_id': this.call_email.assigned_to_id }
+            url,
+            payload
         );
-        await this.setCallEmail(res.body); 
+        await this.setCallEmail(res.body);
     }
   },
   beforeRouteEnter: function(to, from, next) {

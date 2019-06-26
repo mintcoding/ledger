@@ -133,13 +133,13 @@
                         },
                         {
                             data: "assigned_to",
-                            mRender: function (data, type, full) {
-                                if (data) {
-                                    return data.full_name;
-                                } else {
-                                    return '';
-                                }
-                            }
+                            //mRender: function (data, type, full) {
+                              //  if (data) {
+                                //    return data.full_name;
+                                //} else {
+                                  //  return '';
+                                //}
+                            //}
                         },
                         // {
                         //     mRender: function (data, type, full) {

@@ -484,29 +484,48 @@ class CallEmailDatatableSerializer(serializers.ModelSerializer):
     classification = ClassificationSerializer(read_only=True)
     lodgement_date = serializers.CharField(source='lodged_on')
     user_is_assignee = serializers.SerializerMethodField()
-    assigned_to = ComplianceUserDetailsOptimisedSerializer(read_only=True)
+    # assigned_to = ComplianceUserDetailsOptimisedSerializer(read_only=True)
+    assigned_to = serializers.SerializerMethodField()
     user_action = serializers.SerializerMethodField()
+    classification_name = serializers.SerializerMethodField()
+    # status_name = serializers.SerializerMethodField()
+
 
     class Meta:
         model = CallEmail
         fields = (
             'id',
             'status',
-            # 'status_display',
+            # 'status_name',
+            'status_display',
             'user_is_assignee',
             'classification',
             'classification_id',
+            'classification_name',
             'lodgement_date',
             'number',
             'caller',
             'assigned_to',
             'assigned_to_id',
             'user_action'
-
         )
         read_only_fields = (
             'id', 
             )
+
+    # def get_status_name(self, obj):
+      #  if obj.status:
+       #     return obj.status
+        
+    def get_classification_name(self, obj):
+        classification = ClassificationSerializer(instance=obj.classification)
+        if classification.data:
+            return classification.data.get('name')
+
+    def get_assigned_to(self, obj):
+        assigned_to = ComplianceUserDetailsOptimisedSerializer(instance=obj.assigned_to)
+        if assigned_to.data:
+            return assigned_to.data.get('full_name')
 
     def get_user_is_assignee(self, obj):
         # user = EmailUser.objects.get(id=self.context.get('request', {}).user.id)
