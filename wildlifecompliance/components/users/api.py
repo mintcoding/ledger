@@ -504,6 +504,24 @@ class CompliancePermissionGroupViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
+    @detail_route(methods=['GET', ])
+    def get_allocated_group_members(self, request, *args, **kwargs):
+
+        instance = self.get_object()
+        allocated_group = [{
+                'email': '',
+                'first_name': '',
+                'full_name': '',
+                'id': None,
+                'last_name': '',
+                'title': '',
+                }]
+        serializer = CompliancePermissionGroupMembersSerializer(instance)
+        print(serializer.data)
+        for member in serializer.data['members']:
+            allocated_group.append(member)
+
+        return Response(data={'allocated_group': allocated_group})
 
 class RegionDistrictViewSet(viewsets.ModelViewSet):
     queryset = RegionDistrict.objects.all()

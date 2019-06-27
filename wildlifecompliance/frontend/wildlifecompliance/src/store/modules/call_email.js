@@ -238,6 +238,9 @@ export const callemailStore = {
         updateOccurrenceTimeEnd(state, time) {
             Vue.set(state.call_email, 'occurrence_time_end', time);
         },
+        updateAssignedToId(state, id) {
+            state.call_email.assigned_to_id = id;
+        },
     },
     actions: {
         async loadCallEmail({ dispatch, }, { call_email_id }) {
@@ -360,7 +363,10 @@ export const callemailStore = {
             commit('updateRegionId', id);
         },
         
-        async loadAllocatedGroup({ dispatch }, { region_district_id, group_permission } ) {
+        async loadAllocatedGroupForRegion({ dispatch }, { region_district_id, group_permission } ) {
+            console.log("loadAllocatedGroupForRegion");
+            console.log(region_district_id);
+            console.log(group_permission);
             let url = helpers.add_endpoint_join(
                 api_endpoints.region_district,
                 region_district_id + '/get_group_id_by_region_district/'
@@ -380,6 +386,21 @@ export const callemailStore = {
                     return {'errorResponse': 'This group has no members'};
                 }
             } 
+        },
+        async loadAllocatedGroupFromId({ dispatch }, group_id) {
+            console.log("loadAllocatedGroupFromId");
+            let url = helpers.add_endpoint_join(
+                api_endpoints.compliancepermissiongroup,
+                group_id + '/get_allocated_group_members/'
+                );
+            let returned = await Vue.http.get(url);
+            console.log(returned);
+            if (returned.body.allocated_group) {
+                await dispatch('setAllocatedGroupList', returned.body.allocated_group);
+                if (returned.body.allocated_group.length <= 1) {
+                    return {'errorResponse': 'This group has no members'};
+                }
+            }
         },
         setAllocatedGroupId({ commit, }, id) {
             commit("updateAllocatedGroupId", id);
@@ -440,6 +461,10 @@ export const callemailStore = {
         },
         setOccurrenceTimeEnd({ commit }, time ) {
             commit("updateOccurrenceTimeEnd", time);
+        },
+        setAssignedToId({ commit }, id ) {
+            console.log("setAssignedToId");
+            commit("updateAssignedToId", id);
         },
     },
 };
