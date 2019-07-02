@@ -5,7 +5,7 @@
           <h3>Call/Email: {{ call_email.number }}</h3>
         </div>
         <div class="col-md-3 pull-right">
-          <input  v-if="current_user && current_user.is_volunteer" type="button" @click.prevent="duplicate" class="pull-right btn btn-primary" value="Create Duplicate Call/Email"/>  
+          <input  v-if="call_email.user_is_volunteer" type="button" @click.prevent="duplicate" class="pull-right btn btn-primary" value="Create Duplicate Call/Email"/>  
         </div>
       </div>
           <div class="col-md-3">
@@ -41,7 +41,7 @@
                             </div>
                           </div>
                         </div>
-                        <a @click="updateAssignedToId('current_user')" class="btn">
+                        <a @click="updateAssignedToId('current_user')" class="btn pull-right">
                             Assign to me
                         </a>
                     </div>
@@ -183,7 +183,7 @@
                                 <label class="col-sm-1">No</label>
                             </div></div>
             
-                            <div>
+                            <div v-show="statusId !=='draft'">
                                 <SearchPerson />
                             </div>
                           </FormSection>
@@ -206,13 +206,13 @@
             
                             <div class="col-sm-12 form-group"><div class="row">
                                 <label class="col-sm-3">{{ occurrenceDateLabel }}</label>
-                                <div class="col-sm-3" :disabled="readonlyForm">
-                                  <datepicker :typeable="true" :disabledDates="disabledDates" placeholder="DD/MM/YYYY" input-class="form-control" v-model="call_email.occurrence_date_from"/>
+                                <div class="col-sm-3">
+                                  <datepicker :disabled="readonlyForm" :typeable="true" :disabledDates="disabledDates" placeholder="DD/MM/YYYY" input-class="form-control" v-model="call_email.occurrence_date_from"/>
                                 </div>
                                 <div v-show="call_email.occurrence_from_to" :disabled="readonlyForm">
                                   <label class="col-sm-3">Occurrence date to</label>
-                                  <div class="col-sm-3" :disabled="readonlyForm">
-                                    <datepicker :typeable="true" :disabledDates="disabledDates" placeholder="DD/MM/YYYY" input-class="form-control" v-model="call_email.occurrence_date_to" />
+                                  <div class="col-sm-3">
+                                    <datepicker :disabled="readonlyForm" :typeable="true" :disabledDates="disabledDates" placeholder="DD/MM/YYYY" input-class="form-control" v-model="call_email.occurrence_date_to" />
                                   </div>
                                 </div>
                             </div></div>
@@ -308,7 +308,7 @@
                         </div>
         </div>          
         <div v-if="workflow_type">
-          <CallWorkflow ref="add_workflow" :workflow_type="workflow_type" v-bind:key="workflow_type" />
+          <CallWorkflow ref="add_workflow" :workflow_type="workflow_type" v-bind:key="workflowBindId" />
         </div>
         <Offence ref="offence" />
     </div>
@@ -370,7 +370,7 @@ export default {
       classification_types: [],
       report_types: [],
       referrers: [],
-      allocated_group: [],
+      //allocated_group: [],
       current_schema: [],
       regionDistricts: [],
       sectionLabel: "Details",
@@ -391,6 +391,7 @@ export default {
         api_endpoints.call_email,
         this.$route.params.call_email_id + "/action_log"
       ),
+      workflowBindId: '',
     };
   },
   components: {
@@ -409,8 +410,7 @@ export default {
     }),
     ...mapGetters({
       renderer_form_data: 'renderer_form_data',
-      current_user: 'current_user',
-      // compliance_allocated_group: 'compliance_allocated_group',
+      //current_user: 'current_user',
     }),
     csrf_token: function() {
       return helpers.getCookie("csrftoken");
@@ -500,9 +500,28 @@ export default {
     ...mapActions({
       loadCurrentUser: "loadCurrentUser",
     }),
+    updateWorkflowBindId: function() {
+        let timeNow = Date.now()
+        if (this.workflow_type) {
+            this.workflowBindId = this.workflow_type + '_' + timeNow.toString();
+        } else {
+            this.workflowBindId = timeNow.toString();
+        }
+    },
+    constructRelatedItemsTable: function() {
+        console.log('constructRelatedItemsTable');
+        
+        let vm = this;
+        
+        vm.$refs.related_items_table.vmDataTable.clear().draw();
+
+        if(vm.call_email.related_items){
+          for(let i = 0; i<vm.call_email.related_items.length; i++){
+            let already_exists = vm.$refs.related_items_table.vmDataTable.columns(0).data()[0].includes(vm.call_email.related_items[i].id);
 
     addWorkflow(workflow_type) {
       this.workflow_type = workflow_type;
+      this.updateWorkflowBindId();
       this.$nextTick(() => {
         this.$refs.add_workflow.isModalOpen = true;
       });
@@ -553,7 +572,9 @@ export default {
             );
         let payload = null;
         if (user === 'current_user') {
-            payload = { 'current_user': true }
+            payload = {'current_user': true};
+        } else if (user === 'blank') {
+            payload = {'blank': true};
         } else {
             payload = { 'assigned_to_id': this.call_email.assigned_to_id }
         }

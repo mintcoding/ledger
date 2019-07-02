@@ -549,7 +549,8 @@ export default {
 
 <style scoped>
 .awesomplete {
-    z-index: 1050 !important;
+    /* z-index: 1050 !important; */
+    display: inherit !important;
 }
 .awesomplete > ul {
     z-index: 2001;
