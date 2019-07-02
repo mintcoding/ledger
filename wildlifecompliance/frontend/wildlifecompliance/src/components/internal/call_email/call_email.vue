@@ -54,7 +54,7 @@
                         Action 
                     </div>
                     <div class="panel-body panel-collapse">
-                        <div v-if="statusId ==='draft' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='draft' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="forwardToWildlifeProtectionBranch" @click="addWorkflow('forward_to_wildlife_protection_branch')" class="btn btn-primary btn-block">
                                   Forward to Wildlife Protection Branch
@@ -64,7 +64,7 @@
                         <!-- <div class="row">
                           <div class="col-sm-12"/>
                         </div> -->
-                        <div v-if="statusId ==='draft' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='draft' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="forwardToRegions" @click="addWorkflow('forward_to_regions')" class="btn btn-primary btn-block">
                                   Forward to Regions
@@ -72,22 +72,17 @@
                           </div>
                         </div>
 
-                        <div v-if="statusId ==='open' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='open' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="save" @click="save()" class="btn btn-primary btn-block">
                                   Save
                                 </a>
                           </div>
                         </div>
-
                         <!-- <div class="row">
                           <div class="col-sm-12"/>
                         </div> -->
-                        <div v-if="statusId ==='open_followup' && this.call_email.can_user_action" class="row action-button">
-
-                        <!-- <div v-if="statusId ==='open_followup'" class="row action-button"> -->
-                        <!-- <div class="row action-button"> -->
-
+                        <div v-if="statusId ==='open_followup' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a @click="offence()" class="btn btn-primary btn-block">
                                   Offence
@@ -95,7 +90,7 @@
                           </div>
                         </div>
 
-                        <div v-if="statusId ==='open_followup' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='open_followup' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a class="btn btn-primary btn-block">
                                   Sanction Outcome
@@ -105,7 +100,7 @@
                         <!-- <div class="row">
                           <div class="col-sm-12"/>
                         </div> -->
-                        <div v-if="statusId ==='open' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='open' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="allocateForFollowUp" @click="addWorkflow('allocate_for_follow_up')" class="btn btn-primary btn-block" >
                                   Allocate for Follow Up
@@ -115,7 +110,7 @@
                         <!-- <div class="row">
                           <div class="col-sm-12"/>
                         </div> -->
-                        <div v-if="statusId ==='open' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='open' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="allocateForInspection" @click="addWorkflow('allocate_for_inspection')" class="btn btn-primary btn-block" >
                                   Allocate for Inspection
@@ -126,7 +121,7 @@
                           <div class="col-sm-12"/>
                         </div> -->
 
-                        <div v-if="statusId ==='open' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId ==='open' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="allocateForCase" @click="addWorkflow('allocate_for_case')" class="btn btn-primary btn-block" >
                                   Allocate for Case
@@ -136,7 +131,7 @@
                         <!-- <div class="row">
                           <div class="col-sm-12"/>
                         </div> -->
-                        <div v-if="statusId !=='closed' && this.call_email.can_user_action" class="row action-button">
+                        <div v-if="statusId !=='closed' && !this.call_email.readonly_user" class="row action-button">
                           <div class="col-sm-12">
                                 <a ref="close" @click="addWorkflow('close')" class="btn btn-primary btn-block">
                                   Close
@@ -154,9 +149,9 @@
             <div class="row">
 
                 <div class="container-fluid">
-                    <ul class="nav nav-pills aho2">
-                        <li class="nav-item active"><a data-toggle="tab" :href="'#'+cTab">Call/Email</a></li>
-                        <li class="nav-item"><a data-toggle="tab" :href="'#'+rTab">Related Items</a></li>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" :href="'#'+cTab">Call/Email</a></li>
+                        <li><a data-toggle="tab" :href="'#'+rTab">Related Items</a></li>
                     </ul>
                     <div class="tab-content">
                         <div :id="cTab" class="tab-pane fade in active">
@@ -288,13 +283,11 @@
 
                         </div>  
                         <div :id="rTab" class="tab-pane fade in">
-                            <FormSection :formCollapse="false" label="Related Items">
-                                <div class="col-sm-12 form-group"><div class="row">
-                                    <div class="col-sm-12">
-                                        <datatable ref="related_items_table" id="related_items_table" :dtOptions="dtOptionsRelatedItems" :dtHeaders="dtHeadersRelatedItems" />
-                                    </div>
-                                </div></div>
-                            </FormSection>
+                           <div class="col-sm-12 form-group"><div class="row">
+                                <div class="col-sm-12">
+                                    <datatable ref="related_items_table" id="related_items_table" :dtOptions="dtOptionsRelatedItems" :dtHeaders="dtHeadersRelatedItems" />
+                                </div>
+                            </div></div>
                         </div>
                     </div>
                 </div>       
@@ -410,14 +403,6 @@ export default {
     Offence,
     datatable,
   },
-  watch: {
-      call_email: {
-          handler: function (){
-              this.constructRelatedItemsTable();
-          },
-          deep: true
-      },
-  },
   computed: {
     ...mapGetters('callemailStore', {
       call_email: "call_email",
@@ -425,6 +410,7 @@ export default {
     ...mapGetters({
       renderer_form_data: 'renderer_form_data',
       current_user: 'current_user',
+      // compliance_allocated_group: 'compliance_allocated_group',
     }),
     csrf_token: function() {
       return helpers.getCookie("csrftoken");
@@ -443,14 +429,53 @@ export default {
         return "Occurrence time";
       }
     },
+    //personSearchVisible: function(){
+      //  if (this.call_email.status && this.call_email.status.id === 'draft') {
+        //  return false;
+        //} else {
+          //return true;
+        //}
+    //},
+    //isReadonly: function() {
+      //  return this.call_email.readonly_user;
+        
+        //if (this.call_email.readonly_status) {
+         //   return true;
+        //} else {
+         //   return this.call_email.readonly_user;
+       // }
+        
+        //if (this.call_email.status && this.call_email.status.id === 'draft' &&
+        //this.call_email.assigned_to_id === this.current_user.id) {
+         // return false;
+        //} else {
+        //  return true;
+        //}
+    //},
     readonlyForm: function() {
-        return !this.call_email.can_user_edit_form;
+        return this.call_email.readonly_status;
+    },
+    readonlyPersonSearch: function() {
+        if (this.statusId === 'draft') {
+            return false;
+        } else if (this.statusId === 'open' && this.call_email.user_is_assignee) {
+            return false;
+        } else {
+            return true;
+        }
     },
     statusDisplay: function() {
       return this.call_email.status ? this.call_email.status.name : '';
     },
     statusId: function() {
       return this.call_email.status ? this.call_email.status.id : '';
+    },
+    allocateToVisibility: function() {
+      if (this.workflow_type.includes('allocate') && this.call_email.allocated_group) {
+        return true;
+      } else {
+        return false;
+      }
     },
   },
   filters: {
@@ -475,30 +500,7 @@ export default {
     ...mapActions({
       loadCurrentUser: "loadCurrentUser",
     }),
-    constructRelatedItemsTable: function() {
-        console.log('constructRelatedItemsTable');
-        
-        let vm = this;
-        
-        vm.$refs.related_items_table.vmDataTable.clear().draw();
 
-        if(vm.call_email.related_items){
-          for(let i = 0; i<vm.call_email.related_items.length; i++){
-            let already_exists = vm.$refs.related_items_table.vmDataTable.columns(0).data()[0].includes(vm.call_email.related_items[i].id);
-
-            if (!already_exists){
-                vm.$refs.related_items_table.vmDataTable.row.add(
-                    {
-                        'identifier': vm.call_email.related_items[i].identifier,
-                        'descriptor': vm.call_email.related_items[i].descriptor,
-                        'model_name': vm.call_email.related_items[i].model_name,
-                        'Action': vm.call_email.related_items[i],
-                    }
-                ).draw();
-            }
-          }
-        }
-    },
     addWorkflow(workflow_type) {
       this.workflow_type = workflow_type;
       this.$nextTick(() => {
@@ -550,12 +552,10 @@ export default {
             this.call_email.id + '/update_assigned_to_id/'
             );
         let payload = null;
-        if (user == 'current_user') {
-            payload = {'current_user': true};
-        } else if (user == 'blank') {
-            payload = {'blank': true};
+        if (user === 'current_user') {
+            payload = { 'current_user': true }
         } else {
-            payload = { 'assigned_to_id': this.call_email.assigned_to_id };
+            payload = { 'assigned_to_id': this.call_email.assigned_to_id }
         }
         let res = await Vue.http.post(
             url,
@@ -660,19 +660,8 @@ export default {
     margin-top: 5px;
 }
 #main-column {
-  padding-left: 2%;
+  padding-left: 3%;
   padding-right: 0;
   margin-bottom: 50px;
-}
-.awesomplete {
-    width: 100% !important;
-}
-.nav>li>a:focus, .nav>li>a:hover {
-  text-decoration: none;
-  background-color: #eee;
-}
-.nav-item {
-  background-color: hsla(0, 0%, 78%, .8) !important;
-  margin-bottom: 2px;
 }
 </style>

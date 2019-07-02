@@ -809,8 +809,8 @@ class CallEmailViewSet(viewsets.ModelViewSet):
                             instance.referrer.add(referrer)
                 print("referrers")
                 print(instance.referrer.all())
-                #if not workflow_type == 'allocate_for_follow_up':
-                 #   instance.assigned_to_id = None
+                if not workflow_type == 'allocate_for_follow_up':
+                    instance.assigned_to_id = None
                 instance.save()
 
                 # send email
@@ -851,17 +851,10 @@ class CallEmailViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
 
             if request.data.get('current_user'):
-                  serializer = UpdateAssignedToIdSerializer(
+                serializer = UpdateAssignedToIdSerializer(
                         instance=instance,
                         data={
                             'assigned_to_id': request.user.id,
-                            }
-                        )
-            elif request.data.get('blank'):
-                  serializer = UpdateAssignedToIdSerializer(
-                        instance=instance,
-                        data={
-                            'assigned_to_id': None,
                             }
                         )
             else:

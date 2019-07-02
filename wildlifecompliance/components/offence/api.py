@@ -6,13 +6,13 @@ from rest_framework import viewsets, filters, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
-from ledger.accounts.models import EmailUser, Organisation
+from ledger.accounts.models import EmailUser
 from wildlifecompliance.components.call_email.models import Location
 from wildlifecompliance.components.call_email.serializers import LocationSerializer
 from wildlifecompliance.components.main.api import save_location
 from wildlifecompliance.components.offence.models import Offence, SectionRegulation
 from wildlifecompliance.components.offence.serializers import OffenceSerializer, SectionRegulationSerializer, \
-    SaveOffenceSerializer, SaveOffenderSerializer, OrganisationSerializer
+    SaveOffenceSerializer, SaveOffenderSerializer
 from wildlifecompliance.helpers import is_internal
 
 
@@ -57,16 +57,10 @@ class OffenceViewSet(viewsets.ModelViewSet):
 
                 # 4. Create relations between this offence and offender(s)
                 for dict in request_data['offenders']:
-                    if dict['data_type'] == 'individual':
-                        offender = EmailUser.objects.get(id=dict['id'])
-                        serializer_offender = SaveOffenderSerializer(data={'offence_id': saved_offence_instance.id, 'person_id': offender.id})
-                        serializer_offender.is_valid(raise_exception=True)
-                        serializer_offender.save()
-                    elif dict['data_type'] == 'organisation':
-                        offender = Organisation.objects.get(id=dict['id'])
-                        serializer_offender = SaveOffenderSerializer(data={'offence_id': saved_offence_instance.id, 'organisation_id': offender.id})
-                        serializer_offender.is_valid(raise_exception=True)
-                        serializer_offender.save()
+                    offender = EmailUser.objects.get(id=dict['id'])
+                    serializer_offender = SaveOffenderSerializer(data={'offence_id': saved_offence_instance.id, 'person_id': offender.id})
+                    serializer_offender.is_valid(raise_exception=True)
+                    serializer_offender.save()
 
                 # TODO: log user action
 
@@ -95,10 +89,3 @@ class SearchSectionRegulation(viewsets.ModelViewSet):
     serializer_class = SectionRegulationSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('act', 'name', 'offence_text',)
-
-
-class SearchOrganisation(viewsets.ModelViewSet):
-    queryset = Organisation.objects.all()
-    serializer_class = OrganisationSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('abn', 'name',)

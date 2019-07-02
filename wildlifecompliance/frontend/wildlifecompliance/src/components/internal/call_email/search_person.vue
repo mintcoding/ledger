@@ -1,6 +1,6 @@
 <template lang="html">
     <div class="col-sm-12 form-group">
-        <div class="row" >
+        <div class="row" v-if="isEditable">
             <label class="col-sm-3 control-label">Search Person</label>
             <div class="col-sm-6">
                 <input :readonly="!isEditable" class="col-sm-5 form-control" id="search-person" />
@@ -10,9 +10,9 @@
             </div>
         </div>
         <div class="col-md-12">
-            <ul class="nav nav-pills">
-                <li class="nav-item active"><a data-toggle="tab" :href="'#'+dTab">Details</a></li>
-                <li class="nav-item"><a data-toggle="tab" :href="'#'+oTab">Licensing</a></li>
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" :href="'#'+dTab">Details</a></li>
+                <li><a data-toggle="tab" :href="'#'+oTab">Licensing</a></li>
             </ul>
             <div class="tab-content">
                 <div :id="dTab" class="tab-pane fade in active">
@@ -82,7 +82,7 @@
                                         <label for="" class="col-sm-3 control-label">Street</label>
                                         <div class="col-sm-6">
                                             <div v-if="call_email.email_user"><div v-if="call_email.email_user.residential_address">
-                                                <input :readonly="!isEditable" type="text" class="form-control" name="street" placeholder="" v-model="call_email.email_user.residential_address.line1" v-bind:key="call_email.email_user.residential_address.id">
+                                                <input type="text" class="form-control" name="street" placeholder="" v-model="call_email.email_user.residential_address.line1" v-bind:key="call_email.email_user.residential_address.id">
                                             </div></div>
                                         </div>
                                         </div>
@@ -90,7 +90,7 @@
                                         <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
                                         <div class="col-sm-6">
                                             <div v-if="call_email.email_user"><div v-if="call_email.email_user.residential_address">
-                                                <input :readonly="!isEditable" type="text" class="form-control" name="surburb" placeholder="" v-model="call_email.email_user.residential_address.locality" v-bind:key="call_email.email_user.residential_address.id">
+                                                <input type="text" class="form-control" name="surburb" placeholder="" v-model="call_email.email_user.residential_address.locality" v-bind:key="call_email.email_user.residential_address.id">
                                             </div></div>
                                         </div>
                                         </div>
@@ -98,13 +98,13 @@
                                         <label for="" class="col-sm-3 control-label">State</label>
                                         <div class="col-sm-2">
                                             <div v-if="call_email.email_user"><div v-if="call_email.email_user.residential_address">
-                                                <input :readonly="!isEditable" type="text" class="form-control" name="country" placeholder="" v-model="call_email.email_user.residential_address.state" v-bind:key="call_email.email_user.residential_address.id">
+                                                <input type="text" class="form-control" name="country" placeholder="" v-model="call_email.email_user.residential_address.state" v-bind:key="call_email.email_user.residential_address.id">
                                             </div></div>
                                         </div>
                                         <label for="" class="col-sm-2 control-label">Postcode</label>
                                         <div class="col-sm-2">
                                             <div v-if="call_email.email_user"><div v-if="call_email.email_user.residential_address">
-                                                <input :readonly="!isEditable" type="text" class="form-control" name="postcode" placeholder="" v-model="call_email.email_user.residential_address.postcode" v-bind:key="call_email.email_user.residential_address.id">
+                                                <input type="text" class="form-control" name="postcode" placeholder="" v-model="call_email.email_user.residential_address.postcode" v-bind:key="call_email.email_user.residential_address.id">
                                             </div></div>
                                         </div>
                                         </div>
@@ -112,7 +112,7 @@
                                         <label for="" class="col-sm-3 control-label" >Country</label>
                                         <div class="col-sm-4">
                                             <div v-if="call_email.email_user"><div v-if="call_email.email_user.residential_address">
-                                                <select :disabled="!isEditable" class="form-control" name="country" v-model="call_email.email_user.residential_address.country" v-bind:key="call_email.email_user.residential_address.id">
+                                                <select class="form-control" name="country" v-model="call_email.email_user.residential_address.country" v-bind:key="call_email.email_user.residential_address.id">
                                                     <option v-for="c in countries" :value="c.alpha2Code">{{ c.name }}</option>
                                                 </select>
                                             </div></div>
@@ -241,7 +241,7 @@ export default {
             errorDob: false,
             objectAlert: false,
 
-            //forDemo: false,
+            forDemo: false,
         }
     },
     components: {
@@ -259,24 +259,23 @@ export default {
             // renderer_form_data: 'renderer_form_data',
             current_user: 'current_user',
         }),
-        //isReadonly: function() {
-          //  if (this.call_email.status && this.call_email.status.id === 'draft') {
-            //    return false;
-            //} else {
-            //    return true;
-           // }
-        //},
+        isReadonly: function() {
+            if (this.call_email.status && this.call_email.status.id === 'draft') {
+                return false;
+            } else {
+                return true;
+            }
+        },
         isEditable: function() {
-            //if (!this.forDemo){
-             //   return true;
-            //}
+            if (!this.forDemo){
+                return true;
+            }
 
-            //if (this.call_email.status && this.call_email.status.id === 'open' && this.current_user.is_officer) {
-              //  return true;
-            //} else {
-              //  return false;
-            //}
-            return this.call_email.can_user_search_person;
+            if (this.call_email.status && this.call_email.status.id === 'open' && this.current_user.is_officer) {
+                return true;
+            } else {
+                return false;
+            }
         },
         applications_url: function(){
             if (this.call_email.email_user && this.call_email.email_user.id){
@@ -485,12 +484,6 @@ export default {
                 }
             });
         },
-        markMatchedText(original_text, input){
-            let ret_text = original_text.replace(new RegExp(input, "gi"), function(a, b){
-                return '<mark>' + a + '</mark>';
-            });
-            return ret_text;
-        },
         initAwesomplete: function(){
             var self = this;
 
@@ -499,10 +492,6 @@ export default {
                 maxItems: self.max_items, 
                 sort: false, 
                 filter: ()=>{ return true; }, // Display all the items in the list without filtering.
-                item: function(text, input){
-                    let ret =  Awesomplete.ITEM(text, ''); // Not sure how this works but this doesn't add <mark></mark>
-                    return ret;
-                },
                 data: function(item, input){
                     let f_name = item.first_name?item.first_name:'';
                     let l_name = item.last_name?item.last_name:'';
@@ -512,15 +501,7 @@ export default {
                     let p_number = item.phone_number?'P:' + item.phone_number:'';
                     let m_number = item.mobile_number?'M:' + item.mobile_number:'';
                     let dob = item.dob?'DOB:' + item.dob:'DOB: ---';
-                    
-                    let full_name_marked = '<strong>' + self.markMatchedText(full_name, input) + '</strong>';
-                    let email_marked = self.markMatchedText(email, input);
-                    let p_number_marked = self.markMatchedText(p_number, input);
-                    let m_number_marked = self.markMatchedText(m_number, input);
-                    let dob_marked = self.markMatchedText(dob, input);
-
-                    let myLabel = [full_name_marked, email_marked, p_number_marked, m_number_marked, dob_marked].filter(Boolean).join('<br />');
-                    myLabel = '<div data-item-id="' + item.id + '">' + myLabel + '</div>';
+                    let myLabel = ['<span class="full_name">' + full_name + '</span>', email, p_number, m_number, dob].filter(Boolean).join('<br />');
 
                     return { 
                         label: myLabel,   // Displayed in the list below the search box
@@ -543,29 +524,32 @@ export default {
                 /* Retrieve element id of the selected item from the list
                  * By parsing it, we can get the order-number of the item in the list
                  */
+                console.log("origin");
+                console.log(ev.originalEvent.origin);
                 let origin = $(ev.originalEvent.origin)
                 let originTagName = origin[0].tagName;
-                if (originTagName != "DIV"){
-                    // Assuming origin is a child element of <li>
+                if (originTagName == "SPAN"){
                     origin = origin.parent();
                 }
-                let elem_id = origin[0].getAttribute('data-item-id');
-                for(let i = 0; i < self.suggest_list.length; i++){
-                    if (self.suggest_list[i].id == parseInt(elem_id)){
-                        self.loadEmailUser(self.suggest_list[i].id);
-                        break;
-                    }
+                let elem_id = origin[0].id;
+                let reg = /^.+(\d+)$/gi;
+                let result = reg.exec(elem_id)
+                if(result[1]){
+                    let idx = result[1];
+                    self.loadEmailUser(self.suggest_list[idx].id);
+                }else{
+                    console.log("result");
+                    console.log(result);
                 }
             });
         },
     }
 }
-</script>       R
+</script>        
 
-<style>
+<style scoped>
 .awesomplete {
     z-index: 1050 !important;
-    display: inherit !important;
 }
 .awesomplete > ul {
     z-index: 2001;
@@ -579,8 +563,8 @@ export default {
     color: green;
 }
 .tab-content {
-    /* padding: 10px;
-    border: solid 1px lightgray; */
+    padding: 10px;
+    border: solid 1px lightgray;
 }
 .nav-tabs {
     border-bottom: none !important;
@@ -588,5 +572,8 @@ export default {
 #search-person {
     z-index: 1000;
     /* width: 400px; */
+}
+.awesomplete {
+    display: inherit !important;
 }
 </style>
