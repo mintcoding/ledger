@@ -1084,16 +1084,17 @@ class OrganisationComplianceManagementViewSet(viewsets.ModelViewSet):
         print(request.data)
         try:
             instance = self.get_object()
-            postal_address = instance.organisation.postal_address
-            address = request.data.get('address')
+            existing_address = instance.organisation.postal_address
+            # address = request.data.get('address')
             if address:
                 address_serializer = ComplianceManagementSaveOrganisationAddressSerializer(
-                        instance=ledger_org_address, 
+                        instance=existing_address, 
                         data=address)
                 address_serializer.is_valid(raise_exception=True)
                 if address_serializer.is_valid:
                     saved_address = address_serializer.save()
                     print("address saved") 
+                    print(address_serializer.data) 
                     return Response(address_serializer.data, status=status.HTTP_201_CREATED)
 
         except serializers.ValidationError:

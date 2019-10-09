@@ -2,6 +2,7 @@ var site_url = location.origin
 
 module.exports = {
     organisations: '/api/organisations/',
+    organisations_compliancemanagement: '/api/organisations_compliancemanagement/',
     organisations_paginated: '/api/organisations_paginated/',
     organisation_requests: '/api/organisation_requests/',
     organisation_requests_paginated: '/api/organisation_requests_paginated/',

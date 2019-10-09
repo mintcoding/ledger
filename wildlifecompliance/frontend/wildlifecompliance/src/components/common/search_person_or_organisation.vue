@@ -18,7 +18,7 @@
                     <input :disabled="!isEditable" type="button" class="btn btn-primary" value="Create New Person" @click.prevent="createNewPerson()" />
                 </div>
                 <div v-else-if="showCreateNewOrganisation" class="col-sm-2">
-                    <input :disabled="!isEditable" type="button" class="btn btn-primary" value="Create New Organisation" @click.prevent="createNewOrganisation" />
+                    <input :disabled="!isEditable" type="button" class="btn btn-primary" value="Create New Organisation" @click.prevent="createNewOrganisation()" />
                 </div>
             </div>
         </div></div>
@@ -35,7 +35,10 @@
             <div class="col-sm-12" v-if="displayUpdateCreateOrganisation && !personOnly">
               <updateCreateOrganisation 
               displayComponent 
+              :isEditable="isEditable"
+              :organisationToUpdate="entity.id"
               @organisation-saved=""
+              v-bind:key="updateCreateOrganisationBindId"
               ref="update_create_organisation"
               />
             </div>
@@ -88,12 +91,16 @@ export default {
                     this.displayUpdateCreatePerson = true;
                 } else if (this.entity.id && this.entity.data_type === 'organisation') {
                     this.displayUpdateCreatePerson = false;
-                    // TODO: swap following two lines once create org implemented
-                    //this.displayUpdateCreateOrganisation = true;
-                    this.displayUpdateCreateOrganisation = false;
+                    this.displayUpdateCreateOrganisation = true;
                 }
             },
             deep: true
+        },
+        searchType: {
+            handler: function() {
+                this.showCreateNewPerson = false;
+                this.showCreateNewOrganisation = false;
+            }
         },
     },
     computed: {
@@ -121,6 +128,15 @@ export default {
         updateCreatePersonBindId: function() {
             let bindId = 'person'
             if (this.entity.data_type === 'individual' && this.entity.id) {
+                bindId += this.entity.id
+            } else {
+                bindId += this.uuid;
+            }
+            return bindId;
+        },
+        updateCreateOrganisationBindId: function() {
+            let bindId = 'organisation'
+            if (this.entity.data_type === 'organisation' && this.entity.id) {
                 bindId += this.entity.id
             } else {
                 bindId += this.uuid;
@@ -195,6 +211,7 @@ export default {
             });
         },
         createNewOrganisation: function() {
+            console.log("create new org")
             //this.displayUpdateCreateOrganisation = !this.displayUpdateCreateOrganisation;
         },
         clearInput: function(){
@@ -375,6 +392,7 @@ export default {
     created: function() {
         this.uuid += 1;
         this.searchType = this.initialSearchType;
+        console.log(this.parentEntity)
         this.$nextTick(()=>{
             if (this.parentEntity) {
                 Object.assign(this.entity, this.parentEntity)
