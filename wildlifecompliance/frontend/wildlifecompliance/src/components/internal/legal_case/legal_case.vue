@@ -516,67 +516,25 @@ export default {
             let i = 0
             for (let r of this.legal_case.running_sheet_entries) {
                 retRunningSheet.push(Object.assign({}, this.legal_case.running_sheet_entries[i]))
-                //retRunningSheet[i].description += ' transform'
-                let re = /\{\{ \"person\_id\"\: \d+ \}\}/g;
-                let matchArray = re.exec(retRunningSheet[i].description)
-                //console.log(matchArray)
-                if (matchArray && matchArray.length > 0) {
-                    for (let match of matchArray) {
-                        //if (match.index) {
-                        //    console.log("match.index")
-                        //    console.log(match.index)
-                        //    //state.legal_case.running_sheet_transform[i].description =  description + ' transform';
-                        //    state.legal_case.running_sheet_transform[i].description.replace(match, 'blah transform');
-                        //}
-                        console.log("match")
-                        console.log(typeof(match))
-                        console.log(match)
-                        //state.legal_case.running_sheet_transform[i].description =  description;
-                        retRunningSheet[i].description = retRunningSheet[i].description.replace(
-                            match, //'blah transform'
-                            '<a contenteditable="false" target="_blank"  href="/internal/users/7822">Mark</a>'
-                        );
-                        this.constructRunningSheetTableEntry({"rowNum": i, "description": retRunningSheet[i].description});
-                    }
-                }
+                //let re = /\{\{ \"person\_id\"\: \d+ \}\}/g;
+                //let matchArray = re.exec(retRunningSheet[i].description)
+                //if (matchArray && matchArray.length > 0) {
+                //    for (let match of matchArray) {
+                //        console.log("match")
+                //        console.log(typeof(match))
+                //        console.log(match)
+                //        retRunningSheet[i].description = retRunningSheet[i].description.replace(
+                //            match, //'blah transform'
+                //            '<a contenteditable="false" target="_blank"  href="/internal/users/7822">Mark</a>'
+                //        );
+                //        this.constructRunningSheetTableEntry({"rowNum": i, "description": retRunningSheet[i].description});
+                //    }
+                //}
                 i += 1;
             }
         }
         return retRunningSheet;
     },
-    //runningSheetEntries: function() {
-    //    let retRunningSheet = null;
-    //    if (this.legal_case && this.legal_case.running_sheet_entries) {
-    //        //Object.assign(ret_running_sheet, this.legal_case.running_sheet_entries);
-    //        retRunningSheet = this.legal_case.running_sheet_entries;
-    //    }
-    //    return retRunningSheet;
-    //},
-    //runningSheetTransform: function() {
-    //    let retRunningSheet = null;
-    //    if (this.legal_case && this.legal_case.running_sheet_transform) {
-    //        //Object.assign(ret_running_sheet, this.legal_case.running_sheet_entries);
-    //        retRunningSheet = this.legal_case.running_sheet_transform;
-    //    }
-    //    return retRunningSheet;
-    //},
-    //runningSheetObj: function() {
-    //    let retRunningSheetObj = {}
-    //    if (this.legal_case && this.legal_case.running_sheet_entries) {
-    //        for (let r of this.legal_case.running_sheet_entries) {
-    //            retRunningSheetObj[r.number] = r;
-    //        }
-    //    }
-    //    return retRunningSheetObj;
-    //},
-    //running_sheet: function() {
-    //    let ret_running_sheet = null;
-    //    if (this.legal_case && this.legal_case.running_sheet_object) {
-    //        //Object.assign(ret_running_sheet, this.legal_case.running_sheet_entries);
-    //        ret_running_sheet = this.legal_case.running_sheet_object;
-    //    }
-    //    return ret_running_sheet;
-    //},
   },
   watch: {
       magicValue: {
@@ -590,21 +548,41 @@ export default {
           },
       },
       runningSheet: {
-          handler: function () {
+          handler: function (newVal, oldVal) {
+              //console.log("newVal")
               //console.log(newVal)
+              //console.log("oldVal")
               //console.log(oldVal)
-              //this.runningSheetEventListeners();
-              //this.constructRunningSheetTable();
+              let i = 0;
+              let updated = false;
+              if (oldVal.length > 0 && !updated) {
+                  for (let newRow of newVal) {
+                      if (newRow !== oldVal[i] && newRow.description) {
+                          let re = /\{\{ \"person\_id\"\: \d+ \}\}/g;
+                          let reCompare = /\{\{/g;
+                          let matchArray = re.exec(oldVal[i].description) ? re.exec(oldVal[i].description) : []
+                          let compareOldArray = reCompare.exec(oldVal[i].description) ? reCompare.exec(oldVal[i].description) : []
+                          let compareNewArray = reCompare.exec(newRow.description) ? reCompare.exec(newRow.description) : []
+                          if (matchArray && matchArray.length > 0 && compareNewArray.length > compareOldArray.length) {
+                              for (let match of matchArray) {
+                                  //console.log("match")
+                                  //console.log(typeof(match))
+                                  //console.log(match)
+                                  let replaceDescription = oldVal[i].description.replace(
+                                      match, //'blah transform'
+                                      '<a contenteditable="false" target="_blank"  href="/internal/users/7822">Mark</a>'
+                                  );
+                                  this.constructRunningSheetTableEntry({"rowNum": i, "description": replaceDescription});
+                                  //updated = true;
+                              }
+                          }
+                      }
+                      i += 1
+                  }
+              }
           },
           deep: true
       },
-      //runningSheetEntries: {
-      //    handler: function() {
-      //        //this.runningSheetEventListeners();
-      //        //this.constructRunningSheetTable();
-      //    },
-      //    deep: true
-      //},
   },
   filters: {
     formatDate: function(data) {
@@ -643,6 +621,8 @@ export default {
     constructRunningSheetTableEntry: function({rowNum, description}){
         if (this.$refs.running_sheet_table && this.$refs.running_sheet_table.vmDataTable) {
             console.log("constructRunningSheetTableEntry");
+            console.log(rowNum);
+            console.log(description);
             //let tableCell = this.$refs.running_sheet_table.vmDataTable.rows(rowNum).data()[0].description
             let tableRow = this.$refs.running_sheet_table.vmDataTable.row(rowNum).data()
             //let tableCell3 = this.$refs.running_sheet_table.vmDataTable.cell(rowNum).data()
