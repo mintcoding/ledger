@@ -5,11 +5,25 @@
                 <div class="row col-sm-12">
 
                     <div class="form-group"><div class="row">
+                        <label class="col-sm-3">New due date</label>
+                        <div class="col-sm-3">
+                            <div class="input-group date" ref="newDueDatePicker">
+                                <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="new_due_date" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        current due date: {{ comingDueDateDisplay }} <br />
+                        (New due: {{ extendMinDateDisplay }} --- {{ extendMaxDateDisplay }})
+                    </div></div>
+
+                    <div class="form-group"><div class="row">
                         <div class="col-sm-3">
                             <label class="control-label pull-left">Reason</label>
                         </div>
                         <div class="col-sm-7">
-                            <textarea class="form-control" placeholder="add reason" id="reason" v-model="workflowDetails"/>
+                            <textarea class="form-control" placeholder="add reason" id="reason" v-model="reasonForExtension"/>
                         </div>
                     </div></div>
 
@@ -53,7 +67,7 @@ require("select2/dist/css/select2.min.css");
 require("select2-bootstrap-theme/dist/select2-bootstrap.min.css");
 
 export default {
-    name: "SanctionOutcomeWorkflow",
+    name: "ExtendPaymentDueDate",
     data: function() {
         return {
             processingDetails: false,
@@ -64,11 +78,13 @@ export default {
                         'name': ''
                     }
             ],
-            workflowDetails: '',
+            reasonForExtension: '',
             errorResponse: '',
 
             allocatedGroup: [],
             allocated_group_id: null,
+
+            new_due_date: null,
         }
     },
     components: {
@@ -76,7 +92,15 @@ export default {
       filefield,
     },
     props:{
-        workflow_type: {
+        due_date_1st: {
+            type: String,
+            default: '',
+        },
+        due_date_2nd: {
+            type: String,
+            default: '',
+        },
+        due_date_max: {
             type: String,
             default: '',
         },
@@ -86,64 +110,88 @@ export default {
             sanction_outcome: "sanction_outcome",
         }),
         modalTitle: function() {
-            switch(this.workflow_type){
-                case 'withdraw_by_manager':
-                    return "Withdraw";
-                    break;
-                case 'escalate_for_withdrawal':
-                    return "Escalate for Withdrawal";
-                    break;
-                case 'send_to_manager':
-                    return "Send to Manager";
-                    break;
-                case 'endorse':
-                    return "Endorse";
-                    break;
-                case 'decline':
-                    return "Decline";
-                    break;
-                case 'return_to_officer':
-                    return "Return to Officer";
-                    break;
-                default:
-                    return "---";
+            return 'Extend payment due date'
+        },
+        extendMinDateDisplay: function() {
+            if (this.comingDueDate){
+                return (this.comingDueDate.getDate() + 1) + '/' + (this.comingDueDate.getMonth() + 1) + '/' + this.comingDueDate.getFullYear()
+            } else {
+                return '';
             }
         },
-        regionDistrictId: function() {
-            // if (this.district_id || this.region_id) {
-            //     return this.district_id ? this.district_id : this.region_id;
-            if (this.sanction_outcome.district || this.sanction_outcome.region) {
-                return this.sanction_outcome.district ? this.sanction_outcome.district : this.sanction_outcome.region;
+        extendMaxDateDisplay: function() {
+            if (this.extendMaxDate){
+                return this.extendMaxDate.getDate() + '/' + (this.extendMaxDate.getMonth() + 1) + '/' + this.extendMaxDate.getFullYear()
+            } else {
+                return '';
+            }
+        },
+        extendMaxDate: function() {
+            return new Date(this.due_date_max);
+        },
+        comingDueDateDisplay: function() {
+            if(this.comingDueDate){
+                return this.comingDueDate.getDate() + '/' + (this.comingDueDate.getMonth() + 1) + '/' + this.comingDueDate.getFullYear()
+            } else {
+                return '';
+            }
+        },
+        comingDueDate: function() {
+            if (this.due_date_1st && this.due_date_2nd){
+                let now = new Date();
+                let due_1st = new Date(this.due_date_1st);
+                let due_2nd = new Date(this.due_date_2nd);
+
+                if (now <= due_1st){
+                    return due_1st;
+                } else if (now <= due_2nd){
+                    return due_2nd;
+                } else {
+                    console.warn('This infringement notice is already overdue');
+                    return null;  // Already overdue
+                }
             } else {
                 return null;
             }
-      },
-    //   groupPermission: function() {
-    //       if (!this.workflow_type) {
-    //           return "";  // TODO: make sure if this is correct
-    //       } else if (this.workflow_type === 'send_to_manager') {
-    //           return "manager";
-    //       } else if (this.workflow_type === 'return_to_officer') {
-    //           return "officer";
-    //       } else if (this.workflow_type === 'endorse') {
-    //           return "infringement_notice_coordinator";
-    //       } else if (this.workflow_type === 'decline') {
-    //           if (this.sanction_outcome.issued_on_paper) {
-    //              return "officer";
-    //           } else {
-    //              return "manager";
-    //           }
-    //       } else if (this.workflow_type === 'withdraw') {
-    //           return "infringement_notice_coordinator";
-    //       } else if (this.workflow_type === 'close') {
-    //           return "";  // TODO: make sure if this is correct
-    //       }
-    //   },
+        },
+    },
+    mounted: function () {
+        this.$nextTick(() => {
+            this.addEventListeners();
+        });
     },
     methods: {
         ...mapActions({
             loadAllocatedGroup: 'loadAllocatedGroup',  // defined in store/modules/user.js
         }),
+        addEventListeners: function () {
+            let vm = this;
+            let el_fr_date = $(vm.$refs.newDueDatePicker);
+            let options = { format: "DD/MM/YYYY" };
+
+            if (vm.due_date_max){
+                options['maxDate'] = vm.extendMaxDate;
+            }
+            if (vm.comingDueDate){
+                // Copy comingDuDate object
+                let coming_due_date = new Date(vm.comingDueDate.getTime());
+                // Calculate next day and set it to the datepicker as a minDate
+                coming_due_date.setDate(coming_due_date.getDate() + 1);
+                options['minDate'] = coming_due_date;
+                // Enter a default value to the input box
+                vm.new_due_date = coming_due_date.getDate() + '/' + (coming_due_date.getMonth() + 1) + '/' + coming_due_date.getFullYear();
+            }
+
+            el_fr_date.datetimepicker(options);
+
+            el_fr_date.on("dp.change", function(e) {
+                if (el_fr_date.data("DateTimePicker").date()) {
+                    vm.new_due_date = e.date.format("DD/MM/YYYY");
+                } else if (el_fr_date.data("date") === "") {
+                    vm.new_due_date = null;
+                }
+            });
+        },
         ok: async function () {
             try {
                 this.processingDetails = true;
@@ -199,11 +247,11 @@ export default {
             this.attachAnother();
         },
         sendData: async function () {
-            let post_url = '/api/sanction_outcome/' + this.sanction_outcome.id + '/workflow_action/'
+            let post_url = '/api/sanction_outcome/' + this.sanction_outcome.id + '/extend_due_date/'
             let payload = new FormData();
-            payload.append('details', this.workflowDetails);
+            payload.append('reason', this.reasonForExtension);
             this.$refs.comms_log_file.commsLogId ? payload.append('comms_log_id', this.$refs.comms_log_file.commsLogId) : null;
-            this.workflow_type ? payload.append('workflow_type', this.workflow_type) : null;
+            this.new_due_date ? payload.append('new_due_date', this.new_due_date) : null;
 
             let res = await Vue.http.post(post_url, payload);
             return res
@@ -212,7 +260,7 @@ export default {
             let vm = this;
             let _file = null;
             var file_input = $('.'+target)[0];
-  
+
             if (file_input.files && file_input.files[0]) {
                 var reader = new FileReader();
                 reader.readAsDataURL(file_input.files[0]); 
