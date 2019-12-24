@@ -18,6 +18,7 @@ from wildlifecompliance.components.main.views import (
         SearchWeakLinksView,
         CreateWeakLinkView,
         RemoveWeakLinkView,
+        DepartmentUserView,
         )
 from wildlifecompliance.components.applications import views as application_views
 from wildlifecompliance.components.offence.api import OffenceViewSet
@@ -34,6 +35,7 @@ from wildlifecompliance.components.sanction_outcome import api as sanction_outco
 from wildlifecompliance.components.main import api as main_api
 from wildlifecompliance.components.wc_payments import views as payment_views
 from wildlifecompliance.components.legal_case import api as legal_case_api
+from wildlifecompliance.components.artifact import api as artifact_api
 
 from wildlifecompliance.utils import are_migrations_running
 
@@ -104,10 +106,19 @@ router.register(r'offence_paginated', offence_api.OffencePaginatedViewSet)
 router.register(r'temporary_document', main_api.TemporaryDocumentCollectionViewSet)
 router.register(r'legal_case', legal_case_api.LegalCaseViewSet)
 router.register(r'legal_case_paginated', legal_case_api.LegalCasePaginatedViewSet)
+router.register(r'document_artifact', artifact_api.DocumentArtifactViewSet)
+router.register(r'artifact', artifact_api.ArtifactViewSet)
+router.register(r'artifact_paginated', artifact_api.ArtifactPaginatedViewSet)
+router.register(r'physical_artifact', artifact_api.PhysicalArtifactViewSet)
+router.register(r'physical_artifact_types', artifact_api.PhysicalArtifactTypeViewSet)
+router.register(r'document_artifact_types', artifact_api.DocumentArtifactTypeViewSet)
 
 api_patterns = [url(r'^api/my_user_details/$',
                     users_api.GetMyUserDetails.as_view(),
                     name='get-my-user-details'),
+                url(r'^api/department_users$', 
+                    users_api.DepartmentUserList.as_view(), 
+                    name='department-users-list'),
                 url(r'^api/my_compliance_user_details/$',
                     users_api.GetComplianceUserDetails.as_view(),
                     name='get-my-compliance-user-details'),
@@ -221,7 +232,7 @@ urlpatterns = [
     url(r'^infringement_penalty/(?P<sanction_outcome_id>\d+)/$', payment_views.InfringementPenaltyView.as_view(), name='infringement_penalty'),
     url(r'^success/fee/$', payment_views.InfringementPenaltySuccessView.as_view(), name='penalty_success'),
     # url(r'wc/payments/invoice-pdf/(?P<reference>\d+)/$', payment_views.InvoicePDFView.as_view(), name='wc-invoice-pdf'),
-    url(r'^sanction_outcome/pdf/(?P<sanction_outcome_id>\d+)/$', payment_views.SanctionOutcomePDFView.as_view(), name='sanction_outcome_pdf'),
+    # url(r'^sanction_outcome/pdf/(?P<sanction_outcome_id>\d+)/$', payment_views.SanctionOutcomePDFView.as_view(), name='sanction_outcome_pdf'),
 ] + ledger_patterns
 
 if not are_migrations_running():

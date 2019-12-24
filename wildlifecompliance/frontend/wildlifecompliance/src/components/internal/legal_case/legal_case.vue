@@ -268,6 +268,8 @@ export default {
             runningSheetEntriesUpdated: [],
             runningSheetHistoryEntryBindId: '',
             runningSheetHistoryEntryInstance: '',
+            //runningSheetArtifactList: [],
+            //runningSheetPersonList: [],
             objectHash: null,
             runTab: 'runTab'+this._uid,
             rTab: 'rTab'+this._uid,
@@ -563,7 +565,7 @@ export default {
             recordDescriptionHtml = this.cancelModalUrl(recordNumberElement)
         } else if (entity && entity.data_type === 'individual' && action === 'ok') {
             recordDescriptionHtml = this.insertPersonModalUrl({"entity": entity, "recordNumberElement": recordNumberElement})
-        } else if (entity && entity.data_type === 'artifact' && action === 'ok') {
+        } else if (entity && entity.artifact_type && action === 'ok') {
             recordDescriptionHtml = this.insertArtifactModalUrl({"entity": entity, "recordNumberElement": recordNumberElement})
         } else if (entity && entity.data_type === 'url' && action === 'ok') {
             recordDescriptionHtml = this.insertModalUrl({"entity": entity, "recordNumberElement": recordNumberElement})
@@ -590,6 +592,8 @@ export default {
         let replacementVal = ''
         if (entity.full_name) {
             replacementVal = `<a contenteditable="false" target="_blank" href="/internal/users/${entity.id}">${entity.full_name}</a>`
+            // add to runningSheetPersonList
+            this.legal_case.runningSheetPersonList.push(entity)
         }
         let recordDescriptionHtml = recordNumberElement[0].innerHTML.replace(this.tabSelectedKeyCombination, replacementVal).replace(/&nbsp\;/g, ' ');
         return recordDescriptionHtml;
@@ -603,11 +607,19 @@ export default {
     */
     insertArtifactModalUrl: function({"entity": entity, "recordNumberElement": recordNumberElement}) {
         let replacementVal = ''
+        if (entity.artifact_type) {
             // TODO: replace with correct artifact url
-        if (entity.full_name) {
-            replacementVal = `<a contenteditable="false" target="_blank" href="/internal/users/${entity.id}">${entity.full_name}</a>`
+            replacementVal = `<a contenteditable="false" target="_blank" href="/internal/object/${entity.id}">${entity.artifact_type}</a>`
+            // add to runningSheetArtifactList
+            /*
+            if (this.legal_case && !this.legal_case.runningSheetArtifactList) {
+                this.legal_case.runningSheetArtifactList = []
+            }
+            this.legal_case.runningSheetArtifactList.push(entity)
+            */
         }
         let recordDescriptionHtml = recordNumberElement[0].innerHTML.replace(this.tabSelectedKeyCombination, replacementVal).replace(/&nbsp\;/g, ' ');
+        console.log(recordDescriptionHtml);
         return recordDescriptionHtml;
     },
     cancelModalUrl: function(recordNumberElement) {
@@ -617,6 +629,7 @@ export default {
         return recordDescriptionHtml;
     },
     insertModalUrl: function({"entity": entity, "recordNumberElement": recordNumberElement}) {
+        console.log(entity)
         let replacementVal = ''
         /*
         console.log(entity)
@@ -624,7 +637,8 @@ export default {
         */
 
         if (entity.url) {
-            let fullUrl = "https://" + entity.url.trim();
+            //let fullUrl = "https://" + entity.url.trim();
+            let fullUrl = entity.urlProtocol + "://" + entity.url.trim();
             replacementVal = `<a contenteditable="false" target="_blank" href=${fullUrl}>${entity.url}</a>`
             //replacementVal = `<a target="_blank" href=${fullUrl}>${entity.url}</a>`
         }
@@ -868,6 +882,8 @@ export default {
             this.searchArtifactKeyPressed = false;
         } else if (e.key === '!' && e.shiftKey) {
             this.searchArtifactKeyPressed = true;
+            this.searchPersonKeyPressed = false;
+            this.insertUrlKeyPressed = false;
         } else if (e.key === '@' && e.shiftKey && this.searchPersonKeyPressed) {
             //let rowElement = $('#' + e.target.id);
             //this.openSearchPersonOrganisation(e.target.id)
@@ -877,6 +893,8 @@ export default {
             this.searchPersonKeyPressed = false;
         } else if (e.key === '@' && e.shiftKey) {
             this.searchPersonKeyPressed = true;
+            this.searchArtifactKeyPressed = false;
+            this.insertUrlKeyPressed = false;
         } else if (e.key === '^' && e.shiftKey && this.insertUrlKeyPressed) {
             this.rowNumberSelected = e.target.id;
             this.tabSelected = 'url';
@@ -887,6 +905,8 @@ export default {
             this.insertUrlKeyPressed = false;
         } else if (e.key === '^' && e.shiftKey) {
             this.insertUrlKeyPressed = true;
+            this.searchPersonKeyPressed = false;
+            this.searchArtifactKeyPressed = false;
         } else if (e.key === 'Shift' && e.shiftKey) {
             // pass
         } else {
@@ -919,20 +939,24 @@ export default {
         let parsedText = description;
         const personTokenRegex = /\{\{ \"person\_id\"\: \"\d+\"\, \"full\_name\"\: \"\w+(\s\w+)*\" \}\}/g;
         const personIdRegex = /\{\{ \"person\_id\"\: \"\d+/g;
-        const personNameRegex = /\"full\_name\"\: \"\w+ \w+/g;
+        // const personNameRegex = /\"full\_name\"\: \"\w+ \w+/g;
+        const personNameRegex = /\"full\_name\"\: \"\w+/g;
         let personTokenArray = [...description.matchAll(personTokenRegex)];
         for (let personToken of personTokenArray) {
             let idArray = [...personToken[0].matchAll(personIdRegex)];
             let idStr = idArray[0][0]
             let id = idStr.substring(17)
             let nameArray = [...personToken[0].matchAll(personNameRegex)];
-            let nameStr = nameArray[0][0]
-            let fullName = nameStr.substring(14)
-            parsedText = parsedText.replace(
-                personToken[0],
-                `<a contenteditable="false" target="_blank" href="/internal/users/${id}">${fullName}</a>`
-            );
+            if (nameArray && nameArray.length > 0) {
+                let nameStr = nameArray[0][0]
+                let fullName = nameStr.substring(14)
+                parsedText = parsedText.replace(
+                    personToken[0],
+                    `<a contenteditable="false" target="_blank" href="/internal/users/${id}">${fullName}</a>`
+                );
+            }
         }
+        // TODO: add artifact url parsing here
         return parsedText
     },
     addEventListeners: function() {
